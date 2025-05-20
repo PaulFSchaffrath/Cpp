@@ -1,0 +1,143 @@
+Todo:
+    Tetris in C++:
+        - Klasse für TerminalManager, UserInput und Color (schon vorgegeben)
+            - Color:
+                - Variablen:
+                    - private:
+                        - float r, g, b:
+                            - Farbwerte
+                    - public:
+                        - Color → Color(float r, float g, float b):
+                            - Konstruktor
+                        - GetColor:
+                            - float red(), float green(), float blue():
+                                - Getter für Farbwerte
+                - UserInput:
+                    - Variablen:
+                        - public:
+                            - int keycode_
+                            - int mouseRow_
+                            - int mouseCol_
+                    - Methoden:
+                        - public:
+                            - bool isEscape() const
+                            - bool isKeyLeft() const
+                            - bool isKeyRight() const
+                            - bool isKeyUp() const
+                            - bool isKeyDown() const
+                            - bool isMouseclick() const
+                - TerminalManager:
+                    - Variablen:
+                        - private:
+                            - int numRows_
+                            - int numCols_
+                            - int numColors_
+                        - public:
+                            - static UserInput userInput()
+                    - Methoden:
+                        - public:
+                            - explicit TerminalManager(const std::vector<std::pair<Color, Color>> &colors);
+                                - Constructor
+                            - ~TerminalManager();
+                                - Destruktor
+                            - void drawPixel(int row, int col, int color) const;
+                                - Zeichnet ein Pixel
+                            - void drawString(int row, int col, int color, const char *str);
+                                - Zeichnet einen String
+                            - static void refresh();
+                                - Aktualisiert das Terminal
+                            - int numRows() const { return numRows_; }
+                            - int numCols() const { return numCols_; }
+                                - Getter für Zeilen und Spalten
+                            - static UserInput getUserInput();
+                                - Getter für UserInput
+        - Klasse für Tetronimo:
+            - Variablen:
+                - Form -> int shape:
+                    - Form des Tetronimos
+                - Position → int x, int y:
+                    - Position des Tetronimos auf dem Spielfeld
+                - Farbe -> int color:
+                    - Farbe des Tetronimos
+                - Rotation → int rotation:
+                    - Rotation des Tetronimos
+            - Methoden:
+                - Bewegen → void move(int direction):
+                    - Links
+                    - Rechts
+                    - Runter
+                - Drehen → void rotate(int direction):
+                    - Drehen des Tetronimos
+                - Löschen (Destructor) → void delete:
+                    - Löscht das Tetronimo
+                - Zeichnen → void draw:
+                    - Zeichnet das Tetronimo auf das Spielfeld
+        - Klasse für Playfield/Border:
+            - Variablen:
+                - Playfield:
+                    - Breite → int width (static)
+                    - Höhe → int height (static)
+                    - Farbe → int color (static):
+                        - Farbe des Spielfelds. Für später vielleicht noch änderbar machen.
+                - Border:
+                    - Breite → int width (immer 1) (static)
+                    - Farbe → int color (static)
+            - Methoden:
+                - SpielfeldZeichnen → void drawField:
+                    - Zeichnet das Spielfeld
+                - RandZeichnen → void drawBorder:
+                    - Zeichnet den Rand
+                - Überprüfen → bool isRowFull:
+                    - Überprüft, ob eine Zeile voll ist.
+                - ZeileLöschen → void deleteRow:
+                    - Löscht eine Zeile, wenn Zeile voll ist.
+                - ZeileVerschieben → void moveRow:
+                    - Verschiebt eine Zeile nach unten, wenn eine Zeile gelöscht wurde.
+        - Klasse für Spiellogik:
+            - Variablen:
+                - Punkte → int points:
+                    - Punkte des Spielers
+                - Level → int level:
+                    - Level des Spielers
+                - Tetronimo → Tetronimo tetronimo:
+                    - Tetronimo, das gerade fällt
+                - Spielfeld → Playfield field:
+                    - Spielfeld
+                - Rand → Border border:
+                    - Rand
+                - Spielstatus → bool gameStatus:
+                    - Status des Spiels (läuft, pausiert, beendet)
+                - Spielgeschwindigkeit → int gameSpeed:
+                    - Geschwindigkeit des Spiels, connected to level
+            - Methoden:
+                - SpielStarten → void startGame:
+                    - Startet das Spiel
+                - SpielBeenden → void endGame:
+                    - Beendet das Spiel
+                - SpielPause → void pauseGame:
+                    - Pausiert das Spiel
+                - SpielFortsetzen → void resumeGame:
+                    - Setzt das Spiel fort
+                - SpielNeustarten → void restartGame:
+                    - Startet das Spiel neu
+                - SpielSpeichern → void saveGame:
+                    - Speichert das Spiel
+                - SpielLaden → void loadGame (not relevant right now):
+                    - Lädt das Spiel
+                - SpielSchleife → void gameLoop:
+                    - Spiellogik
+        - Klasse für Highscore: (not relevant right now)
+            - Variablen:
+                - Name → string name:
+                    - Name des Spielers
+                - Punkte → int points:
+                    - Punkte des Spielers
+                - Level → int level:
+                    - Level des Spielers
+            - Methoden:
+                - Highscore Eintragen → void addHighscore:
+                    - Highscore in Textdatei speichern
+                - Highscore Anzeigen → void showHighscore:
+                    - Größten Highscore anzeigen
+                - Highscore Löschen → void deleteHighscore:
+                    - Highscore löschen

@@ -2,10 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Author: Hannah Bast <bast@cs.uni-freiburg.de>
 //         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
+// Modified: Paul Schaffrath <ps609@students.uni-freiburg.de> on 2024-07-06.
 
 #pragma once
 
-#include <cstring>
+#include <cstdlib>
 #include <gtest/gtest.h>
 #include <utility>
 
@@ -13,76 +14,73 @@
 class String {
 private:
   char *data_ = nullptr;
-  size_t size_ = 0;
+  size_t size_ = 0u;
 
 public:
+  // The members are already initialized.
   String() = default;
-  ~String() { delete[] data_; }
-  size_t size() const { return size_; }
 
-  // Move constructor.
-  String(String &&s);
+  // Destructor. Note that data_ might be the nullptr,
+  // but deleting the nullptr is allowed (it does nothing).
+  ~String() { delete[] data_; }
+
+  size_t size() const { return size_; }
 
   // Copy constructor.
   String(const String &s);
 
-  // Move assignment.
-  String &operator=(String &&s);
+  // Move Constructor
+  String(String &&other);
 
   // Copy assignment.
   String &operator=(const String &s);
+
+  // Move Assignment
+  String &operator=(String &&other);
 
   // Assignment from C-style string.
   String &operator=(const char *s);
 
   // Return a C-style string.
-  const char *c_str() const { return size() != 0 ? data_ : ""; }
+  const char *c_str() const;
 };
 
 // Sort a number of strings.
 class StringSorter {
 private:
-  String *strings_;
-  size_t size_;
+  size_t size_ = 0;
 
 public:
-  // Construct n empty strings and store them
+  String *strings_ = nullptr;
+  // Default construct an array of n strings.
   explicit StringSorter(size_t n) {
+    // The default constructor is called for each of the strings.
     strings_ = new String[n];
     size_ = n;
   }
 
+  // Return the number of Strings.
   size_t size() const { return size_; }
+
+  // Copy constructor and copy assignment.
+  // Not needed for blatt-06 but necessary to fulfill the
+  // Rule of Three, and they might come in handy for blatt-07
+  StringSorter(const StringSorter &other);
+  StringSorter &operator=(const StringSorter &other);
+  // Destructor
   ~StringSorter() { delete[] strings_; }
 
-  // Access the i-th String
+  // Return a non-const reference to the i-th String.
   String &operator[](size_t i) { return strings_[i]; }
 
-  // Access the i-th String but read-only
-  const String &operator[](size_t i) const { return strings_[i]; }
-
-  // A simple sort (using highly efficient bubble sort).
-
-  // Sort using the move assignment and constructor for swapping
-  void sortWithMove();
-
-  // Sort using the copy assignment and constructor for swapping
+  // Sort the strings (using highly efficient bubble sort).
   void sortWithCopy();
 
-private:
-  // Swap the i-th and j-th string using move semantics.
-  void swapWithMove(size_t i, size_t j) {
-    String tmp = std::move(strings_[i]);
-    strings_[i] = std::move(strings_[j]);
-    strings_[j] = std::move(tmp);
-  }
-  FRIEND_TEST(StringSorter, SwapWithMove);
+  // Sort the strings with Move, objets should be moved instead of copied
+  void sortWithMove();
 
-  // Swap the i-th and j-th string using copy semantics.
-  void swapWithCopy(size_t i, size_t j) {
-    String tmp = strings_[i];
-    strings_[i] = strings_[j];
-    strings_[j] = tmp;
-  }
-  FRIEND_TEST(StringSorter, SwapWithCopy);
+private:
+  // Swap the Strings at positions i and j
+  void swap(size_t i, size_t j);
+  FRIEND_TEST(StringSorter, Swap);
 };

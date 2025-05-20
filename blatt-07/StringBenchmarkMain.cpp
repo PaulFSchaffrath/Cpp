@@ -1,50 +1,43 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Author: Hannah Bast <bast@cs.uni-freiburg.de>
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
-//
+// Copyright 2024, Paul Schaffrath, all rights reserved.
+// <ps609@students.uni-freiburg.de>
 
 #include "./String.h"
-#include <cstdio>
-#include <cstdlib>
 #include <ctime>
 
-// Convert two results of `clock()` to the number of seconds that lie between
-// these measurements.
-float clocksToSecond(clock_t start, clock_t end) {
-  return static_cast<float>(end - start) / CLOCKS_PER_SEC;
-}
-
-int main() {
-  size_t size = 10000;
-  printf("Initializing %zu random strings\n", size);
-  StringSorter sorter(size);
-  StringSorter sorter2(size);
-
-  const int stringSize = 100;
-  char buffer[stringSize + 1] = {};
-  for (size_t i = 0; i < size; ++i) {
-    // Create random strings.
-    for (size_t j = 0; j < stringSize; ++j) {
-      // Sample a random number and store it in buffer[j]
-      // repeat until we have sampled a number that is not
-      // zero.
-      do {
-        buffer[j] = lrand48();
-      } while (!buffer[j]);
-    }
-    sorter[i] = buffer;
-    sorter2[i] = buffer;
+// Test runtime of the String class. Measure runtime of sortWithCopy() and
+// sortWithMove()
+// main with one argument (number of strings to sort)
+int main(int argc, char **argv) {
+  // Create two StringSorter objects with n random strings (Both have the same
+  // strings) the strings are 100 characters long.
+  if (argc != 2) {
+    printf("Usage: %s <number of strings>\n", argv[0]);
+    return 1;
   }
+  size_t n = argv[1] ? atoi(argv[1]) : 1000;
+  StringSorter sorter1(n);
+  StringSorter sorter2(n);
+  for (size_t i = 0; i < n; ++i) {
+    char *s = new char[101];
+    for (size_t j = 0; j < 100; ++j) {
+      s[j] = 'a' + rand() % 26;
+    }
+    s[100] = '\0';
+    sorter1.strings_[i] = s;
+    sorter2.strings_[i] = s;
+  }
+  clock_t start_time_move = clock();
+  sorter2.sortWithMove();
+  clock_t end_time_move = clock();
 
-  clock_t t1 = clock();
-  printf("Sorting %zu random strings with move\n", size);
-  sorter.sortWithMove();
-  clock_t t2 = clock();
-  printf("Sorting finished, took %.2f seconds\n", clocksToSecond(t1, t2));
+  float time_move = (float)(end_time_move - start_time_move) / CLOCKS_PER_SEC;
+  printf("sortWithMove() took %f seconds\n", time_move);
 
-  printf("Sorting %zu random strings using copies\n", size);
-  sorter2.sortWithCopy();
-  clock_t t3 = clock();
-  printf("Sorting finished, took %.2f seconds\n", clocksToSecond(t2, t3));
+  clock_t start_time_copy = clock();
+  sorter1.sortWithCopy();
+  clock_t end_time_copy = clock();
+  float time_copy = (float)(end_time_copy - start_time_copy) / CLOCKS_PER_SEC;
+
+  printf("sortWithCopy() took %f seconds\n", time_copy);
+  return 0;
 }

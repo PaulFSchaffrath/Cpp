@@ -1,0 +1,68 @@
+.SUFFIXES:
+.PRECIOUS: %.o
+.PHONY: all compile checkstyle test clean format run
+
+# Compiler
+CXX = clang++ -std=c++17 -Wall -Wextra -Wdeprecated -fsanitize=address
+
+# Directories
+SRC_DIR = .
+BUILD_DIR = build
+RUN_DIR = run
+INCLUDE_DIRS = -I.
+
+# Libraries
+LIBS = -lncurses
+TESTLIBS = -lgtest -lgtest_main -lpthread
+
+# Sources and binaries
+MAIN_SOURCES = $(wildcard $(SRC_DIR)/*Main.cpp)
+TEST_SOURCES = $(wildcard $(SRC_DIR)/*Test.cpp)
+MAIN_BINARY = $(RUN_DIR)/$(notdir $(basename $(MAIN_SOURCES)))
+TEST_BINARY = $(RUN_DIR)/$(notdir $(basename $(TEST_SOURCES)))
+
+# Objects
+MAIN_OBJECTS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(filter-out $(TEST_SOURCES), $(wildcard $(SRC_DIR)/*.cpp)))
+TEST_OBJECTS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(filter-out $(MAIN_SOURCES), $(wildcard $(SRC_DIR)/*.cpp)))
+
+all: $(BUILD_DIR) $(RUN_DIR) compile checkstyle test
+
+# Create build directory
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# Create run directory
+$(RUN_DIR):
+	mkdir -p $(RUN_DIR)
+
+compile: $(MAIN_BINARY) $(TEST_BINARY)
+
+checkstyle:
+	clang-format --dry-run -Werror *.h *.cpp
+
+test: $(TEST_BINARY)
+	./$(TEST_BINARY)
+
+runn: $(MAIN_BINARY)
+	reset
+	./$(MAIN_BINARY)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(INCLUDE_DIRS) -c -g $< -o $@
+
+$(RUN_DIR)/%Main: $(BUILD_DIR)/%Main.o $(MAIN_OBJECTS)
+	$(CXX) -o $@ $^ $(LIBS)
+
+$(RUN_DIR)/%Test: $(BUILD_DIR)/%Test.o $(TEST_OBJECTS)
+	$(CXX) -o $@ $^ $(LIBS) $(TESTLIBS)
+
+clean:
+#	rm -f $(RUN_DIR)/*Main
+#	rm -f $(RUN_DIR)/*Test
+#	rm -f $(BUILD_DIR)/*.o
+	rm -rf $(BUILD_DIR)
+	rm -rf $(RUN_DIR)
+# 	rm -rf cmake-build-debug
+
+format:
+	clang-format -i *.cpp *.h

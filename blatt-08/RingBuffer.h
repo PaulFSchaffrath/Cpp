@@ -1,22 +1,16 @@
 // Copyright 2024, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Autors: Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
-//         Hannah Bast <bast@cs.uni-freiburg.de>
+// Authors:  Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
+//           Hannah Bast <bast@cs.uni-freiburg.de>
+// Modified: Paul Schaffrath <ps609@students.uni-freiburg.de> on 2024-17-06.
 
 #pragma once
-#include <cstddef> // for size_t
-#include <cstdint> // for uint64_t
+#include <cstddef>
+#include <gtest/gtest.h>
 
 // A simple ring buffer with a fixed capacity. It stores a sequence of elements,
 // to which we can push at the end and pop from the beginning.
 template <typename T> class RingBuffer {
-private:
-  T *data_;
-  // The index of the beginning of the stored sequence.
-  size_t begin_ = 0;
-  size_t size_ = 0;
-  size_t capacity_;
-
 public:
   // Create a `RingBuffer` that can store `capacity` many elements at the same
   // time.
@@ -37,6 +31,18 @@ public:
   // Return the number of elements that are currently stored.
   size_t size() const;
 
+  // Return the capacity of the buffer.
+  size_t capacity() const;
+
+  // Return the head of the buffer.
+  size_t head() const;
+
+  // Return the tail of the buffer.
+  size_t tail() const;
+
+  // Return the elements of the buffer.
+  T *elements() const;
+
   // True if and only if the stored sequence is empty. In this case, it is
   // undefined behavior to call `pop`.
   bool isEmpty() const;
@@ -53,30 +59,11 @@ public:
   // Get the first value of the stored sequence. This must not be called if the
   // buffer is empty, else the behavior is undefined.
   T pop();
-};
 
-// A specialization of the `RingBuffer` class for elements of type `bool`.
-template <> class RingBuffer<bool> {
 private:
-  uint64_t *data_;
-  // The index of the beginning of the stored sequence.
-  size_t begin_ = 0;
-  size_t size_ = 0;
+  T *elements_;
+  size_t size_;
   size_t capacity_;
-
-public:
-  explicit RingBuffer(size_t capacity);
-  ~RingBuffer();
-  size_t size() const;
-  bool isEmpty() const;
-  bool isFull() const;
-  void push(bool value);
-
-  bool pop();
-  RingBuffer(const RingBuffer &) = delete;
-  RingBuffer &operator=(const RingBuffer &) = delete;
-  // Note: The move operations would be deleted anyway (because we deleted the
-  // copy operations), but being explicit is always a good thing.
-  RingBuffer(RingBuffer &&) = delete;
-  RingBuffer &operator=(RingBuffer &&) = delete;
+  size_t head_;
+  size_t tail_;
 };

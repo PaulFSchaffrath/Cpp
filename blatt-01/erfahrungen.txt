@@ -1,0 +1,6 @@
+Die Aufgaben des Übungsballtes waren an sich nicht so schwer. Jedoch war der
+Weg zum Erfolg des fehlerlosen Durchlaufens aller Tests sehr kompliziert. Immer wieder sind irgendwelche Fehlermeldungen aufgezeigt worde, dass zum Beispiel die gtest library Betriebssystemversion 13.6 haben möchte, jedoch nur 13.0 verlinkt war. Und vieles andere, weswegen es doch relativ anstrengend war und auch viel Zeit bei mir in Anspruch genommen hat.
+
+Ich denke aber, dass die nächsten Aufgaben schneller bearbeitet werden können, da ich ja nun weiß, was für Fehler sorgt und wie ich diese am besten beheben kann.
+
+Vorlesung war top und die Auzeichnung sehr nützlich.

@@ -1,88 +1,122 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Author: Axel Lehmann <lehmann@cs.uni-freiburg.de>,
-//         Claudius Korzen <korzen@cs.uni-freiburg.de>,
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>.
+// Copyright 2024, Paul Schaffrath
 
 #include "./GameOfLife.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-// ____________________________________________________________________________
-GameOfLife::GameOfLife(TerminalManager *terminalManager)
-    : terminalManager_{terminalManager} {
-  if (terminalManager_ == nullptr) {
-    return;
-  }
-  numRows_ = terminalManager_->numRows();
-  numCols_ = terminalManager_->numCols();
-}
+// The grid, alternated used to store the current and previous state.
+bool grid1[TerminalManager::MAX_NUM_CELLS];
+bool grid2[TerminalManager::MAX_NUM_CELLS];
+
+//  The initial values are used by the tests. In the game the are overwritten by
+//  the initTerminal function.
+// int TerminalManager::numRows = 100;
+// int TerminalManager::numCols = 100;
+
+// Glider.
+int glider[5][2] = {{1, 0}, {2, 1}, {0, 2}, {1, 2}, {2, 2}};
+
+const int GLIDER_FACTORY_SIZE = 36;
+int gliderFactory[GLIDER_FACTORY_SIZE][2] = {
+    {0, 24}, {1, 22}, {1, 24}, {2, 12}, {2, 13}, {2, 20}, {2, 21}, {2, 34},
+    {2, 35}, {3, 11}, {3, 15}, {3, 20}, {3, 21}, {3, 34}, {3, 35}, {4, 0},
+    {4, 1},  {4, 10}, {4, 16}, {4, 20}, {4, 21}, {5, 0},  {5, 1},  {5, 10},
+    {5, 14}, {5, 16}, {5, 17}, {5, 22}, {5, 24}, {6, 10}, {6, 16}, {6, 24},
+    {7, 11}, {7, 15}, {8, 12}, {8, 13}};
 
 // ____________________________________________________________________________
 void GameOfLife::play() {
-  if (terminalManager_ == nullptr) {
-    return;
-  }
-  while (processUserInput(terminalManager_->getUserInput())) {
+  // Initialize terminal and grid.
+  terminalManager_.setup();
+  initGame();
+
+  // Hauptspielschleife
+  while (true) {
+    UserInput userInput = terminalManager_.getUserInput();
+
+    if (processUserInput(userInput)) {
+      break;
+    }
+
     if (isRunning_) {
       updateState();
     }
-    // Draw and wait.
-    showState();
-    usleep(20'000);
+
+    // Zeichnen und warten.
+    for (int row = 0; row < terminalManager_.numRows(); ++row) {
+      for (int col = 0; col < terminalManager_.numCols(); ++col) {
+        terminalManager_.printCell(row, col, getCurrent(row, col));
+      }
+    }
+    terminalManager_.showInfo(numSteps_, numLivingCells_, isRunning_);
+    usleep(50 * 1000);
   }
+
+  // Clean up window.
+  terminalManager_.cleanup();
 }
 
 // ____________________________________________________________________________
 bool GameOfLife::processUserInput(UserInput userInput) {
-
-  if (userInput.isMouseclick()) {
-    lastClickedCol_ = userInput.mouseCol_;
-    lastClickedRow_ = userInput.mouseRow_;
-    bool prev = getCurrent(lastClickedRow_, lastClickedCol_);
-    setCurrent(lastClickedRow_, lastClickedCol_, !prev);
+  if (userInput.isKey_q()) {
     return true;
-  }
-  switch (userInput.keycode_) {
-  case 'q':
-    // Exit
-    return false;
-  case ' ':
-    // Toggle run
+  } else if (userInput.isSpace()) {
     isRunning_ = !isRunning_;
-    break;
-  case 's':
-    // Execute step
+  } else if (userInput.isKey_s()) {
     updateState();
-    break;
-  case 'c':
-    // Clear all
-    for (int row = 0; row < numRows_; ++row) {
-      for (int col = 0; col < numCols_; ++col) {
+  } else if (userInput.isKey_c()) {
+    for (int row = 0; row < terminalManager_.numRows(); ++row) {
+      for (int col = 0; col < terminalManager_.numCols(); ++col) {
         setCurrent(row, col, false);
       }
     }
-    break;
-  case 'r':
-    // Fill randomly
-    for (int row = 0; row < numRows_; ++row) {
-      for (int col = 0; col < numCols_; ++col) {
+  } else if (userInput.isKey_r()) {
+    for (int row = 0; row < terminalManager_.numRows(); ++row) {
+      for (int col = 0; col < terminalManager_.numCols(); ++col) {
         setCurrent(row, col, drand48() > 0.8);
       }
     }
-    break;
-  case 'g':
-    // Generate glider
+  } else if (userInput.isKey_g()) {
     setCurrent(lastClickedRow_, lastClickedCol_, false);
     for (int i = 0; i < 5; ++i) {
-      int row = lastClickedRow_ + GLIDER[i][0];
-      int col = lastClickedCol_ + GLIDER[i][1];
+      int row = lastClickedRow_ + glider[i][0];
+      int col = lastClickedCol_ + glider[i][1];
       setCurrent(row, col, true);
     }
-    break;
+  } else if (userInput.isKey_G()) {
+    setCurrent(lastClickedRow_, lastClickedCol_, false);
+    for (int i = 0; i < GLIDER_FACTORY_SIZE; ++i) {
+      int row = lastClickedRow_ + gliderFactory[i][0];
+      int col = lastClickedCol_ + gliderFactory[i][1];
+      setCurrent(row, col, true);
+    }
+  } else if (userInput.isMouse()) {
+    lastClickedCol_ = userInput.event.x / 2;
+    lastClickedRow_ = userInput.event.y;
+    bool prev = getCurrent(lastClickedRow_, lastClickedCol_);
+    setCurrent(lastClickedRow_, lastClickedCol_, !prev);
   }
-  return true;
+  return false;
+}
+
+// ____________________________________________________________________________
+void GameOfLife::initGame() {
+  previousGrid_ = grid1;
+  currentGrid_ = grid2;
+  for (int row = 0; row < terminalManager_.numRows(); ++row) {
+    for (int col = 0; col < terminalManager_.numCols(); ++col) {
+      setCurrent(row, col, false);
+      setPrevious(row, col, false);
+    }
+  }
+
+  lastClickedRow_ = -1;
+  lastClickedCol_ = -1;
+
+  isRunning_ = false;
+  numSteps_ = 0;
+  numLivingCells_ = 0;
 }
 
 // ____________________________________________________________________________
@@ -94,8 +128,8 @@ void GameOfLife::updateState() {
   currentGrid_ = previousGrid_;
   previousGrid_ = tempGrid;
 
-  for (int row = 0; row < numRows_; ++row) {
-    for (int col = 0; col < numCols_; ++col) {
+  for (int row = 0; row < terminalManager_.numRows(); ++row) {
+    for (int col = 0; col < terminalManager_.numCols(); ++col) {
       int neighbours = numAliveNeighbours(row, col);
       bool isAlive = false;
       if (getPrevious(row, col)) {
@@ -131,28 +165,10 @@ int GameOfLife::numAliveNeighbours(int row, int col) {
   return result;
 }
 
-// ____________________________________________________________________________
-void GameOfLife::showState() {
-  // Only draw visible cells.
-  for (int row = 0; row < numRows_; ++row) {
-    for (int col = 0; col < numCols_; ++col) {
-      int color =
-          getCurrent(row, col) ? TerminalManager::Red : TerminalManager::White;
-      terminalManager_->drawPixel(row, col, color);
-    }
-  }
-  // Print the statistics, optional for sheet-05
-  const int bufSize = 100;
-  char buffer[bufSize];
-  snprintf(buffer, bufSize, "Step: %9d Cells alive: %4d Running: %d", numSteps_,
-           numLivingCells_, isRunning_);
-  terminalManager_->drawString(0, 0, buffer);
-  terminalManager_->refresh();
-}
-
 // __________________________________________________________________________
 bool GameOfLife::isLegalPosition(int row, int col) {
-  return (row >= 0) && (col >= 0) && (row < numRows_) && (col < numCols_);
+  return (row >= 0) && (col >= 0) && (row < terminalManager_.numRows()) &&
+         (col < terminalManager_.numCols());
 }
 
 // __________________________________________________________________________
@@ -161,7 +177,7 @@ bool GameOfLife::get(int row, int col, bool isPrevious) {
   if (!isLegalPosition(row, col)) {
     return false;
   }
-  int idx = row * numCols_ + col;
+  int idx = row * terminalManager_.numCols() + col;
   bool *grid = isPrevious ? previousGrid_ : currentGrid_;
   return grid[idx];
 }
@@ -176,7 +192,7 @@ void GameOfLife::set(int row, int col, bool value, bool isPrevious) {
   if (!isLegalPosition(row, col)) {
     return;
   }
-  int idx = row * numCols_ + col;
+  int idx = row * terminalManager_.numCols() + col;
   bool *grid = isPrevious ? previousGrid_ : currentGrid_;
   grid[idx] = value;
 }

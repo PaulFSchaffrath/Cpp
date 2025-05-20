@@ -1,131 +1,125 @@
-// Copyright 2024, University of Freiburg
-// Chair of Algorithms and Data Structures
-// Author: Hannah Bast <bast@cs.uni-freiburg.de>,
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
+// Copyright 2024, Paul Schaffrath
 
 #include "./Snake.h"
 #include <ncurses.h>
 
-// ____________________________________________________________________________
-// Global variables. See the header for documentation.
-//
-int posX;
-int posY;
+int xPos;
+int yPos;
+int rotation = 0;
 
-int vx;
-int vy;
+int windowWidth = 60;
+int windowHeight = 30;
 
-int numPixelsX;
-int numPixelsY;
-
-// ____________________________________________________________________________
+// ___________________________________________________________________________
 void initTerminal() {
   initscr();
-  cbreak();
-  noecho();
   curs_set(false);
+  noecho();
   nodelay(stdscr, true);
   keypad(stdscr, true);
-
   start_color();
-  // Initialize one color pair for each color.
-  // For simplicity reasons we only use the foreground
-  // colors.
-  init_pair(1, COLOR_GREEN, COLOR_GREEN);
-  init_pair(2, COLOR_RED, COLOR_RED);
+  init_pair(1, COLOR_WHITE, COLOR_BLACK);
+  init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_BLACK, COLOR_BLACK);
-  init_pair(4, COLOR_BLUE, COLOR_BLUE);
-
-  // COLS and LINES are global variables from ncurses (dimensions of screen).
-  numPixelsX = COLS / 2;
-  numPixelsY = LINES;
 }
 
-// ____________________________________________________________________________
+// ___________________________________________________________________________
 void initGame() {
-  posX = numPixelsX / 2;
-  posY = numPixelsY / 2;
-
-  vx = 1;
-  vy = 0;
+  xPos = windowWidth / 2;
+  yPos = windowHeight / 2;
+  rotation = 0;
 }
 
-// _____________________________________________________________________________
-void drawPixel(int y, int x, int color) {
-  int colorPairNum = 1;
-  if (color == COLOR_RED) {
-    colorPairNum = 2;
-  } else if (color == COLOR_BLACK) {
-    colorPairNum = 3;
-  } else if (color == COLOR_BLUE) {
-    colorPairNum = 4;
-  }
-  attron(COLOR_PAIR(colorPairNum));
-  for (int j = 0; j < 2; j++) {
-    mvprintw(y, x * 2 + j, " ");
-  }
+// ___________________________________________________________________________
+void drawPixel(int row, int column, int color) {
+  attron(COLOR_PAIR(color) | A_REVERSE);
+  mvprintw(row, column, "  ");
+  attroff(COLOR_PAIR(color) | A_REVERSE);
+  refresh();
 }
 
-// ____________________________________________________________________________
+// ___________________________________________________________________________
 void drawBorder(int color) {
-  for (int x = 0; x < numPixelsX; x++) {
+  for (int x = 0; x <= windowWidth; x++) {
     drawPixel(0, x, color);
-    drawPixel(numPixelsY - 1, x, color);
+    drawPixel(windowHeight, x, color);
   }
-
-  for (int y = 0; y < numPixelsY; y++) {
+  for (int y = 0; y <= windowHeight; y++) {
     drawPixel(y, 0, color);
-    drawPixel(y, numPixelsX - 1, color);
+    drawPixel(y, windowWidth, color);
   }
 }
 
-// ____________________________________________________________________________
-void drawSnake(int color) { drawPixel(posY, posX, color); }
+// ___________________________________________________________________________
+void drawSnake(int color) { drawPixel(yPos, xPos, color); }
 
-// ____________________________________________________________________________
+// ___________________________________________________________________________
 bool collidesWithBorder() {
-  int x = posX;
-  int y = posY;
-  return x <= 0 || x >= numPixelsX - 1 || y <= 0 || y >= numPixelsY - 1;
+  if (0 > xPos - 1 || xPos >= windowWidth - 1 || 0 > yPos - 1 ||
+      yPos > windowHeight - 1) {
+    return true;
+  }
+  return false;
 }
 
-// ____________________________________________________________________________
+// ___________________________________________________________________________
 void moveSnake() {
-  posX = posX + vx;
-  posY = posY + vy;
+  switch (rotation) {
+  case 0:
+    xPos += 2;
+    break;
+  case 1:
+    yPos++;
+    break;
+  case 2:
+    xPos -= 2;
+    break;
+  case 3:
+    yPos--;
+    break;
+  }
 }
 
-// ____________________________________________________________________________
+// ___________________________________________________________________________
 bool handleKey(int key) {
-  int oldVx = vx;
-  int oldVy = vy;
   switch (key) {
-  case 27: // ESC
-    return false;
-  case KEY_DOWN:
-    vx = 0;
-    vy = 1;
+  case KEY_RIGHT:
+    if (rotation == 0 || rotation == 2) {
+      break;
+    } else {
+      rotation = 0;
+      return false;
+    }
     break;
-  case KEY_UP:
-    vx = 0;
-    vy = -1;
+  case KEY_DOWN:
+    if (rotation == 1 || rotation == 3) {
+      break;
+    } else {
+      rotation = 1;
+      return false;
+    }
     break;
   case KEY_LEFT:
-    vx = -1;
-    vy = 0;
+    if (rotation == 2 || rotation == 0) {
+      break;
+    } else {
+      rotation = 2;
+      return false;
+    }
     break;
-  case KEY_RIGHT:
-    vx = 1;
-    vy = 0;
+  case KEY_UP:
+    if (rotation == 3 || rotation == 1) {
+      break;
+    } else {
+      rotation = 3;
+      return false;
+    }
     break;
-  default:
-    break;
+  case 27:
+    return true;
   }
-  // Ignore the change of direction if it is illegal
-  if (oldVx + vx == 0 && oldVy + vy == 0) {
-    vx = oldVx;
-    vy = oldVy;
-  }
-
-  return true;
+  return false;
 }
+
+// ___________________________________________________________________________
+void endNcurses() { endwin(); }

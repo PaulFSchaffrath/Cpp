@@ -1,64 +1,67 @@
 // Copyright 2024, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Author: Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>.
+// Author: Axel Lehmann <lehmann@cs.uni-freiburg.de>,
+//         Claudius Korzen <korzen@cs.uni-freiburg.de>.
+//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>.
+//
 
 #pragma once
+#include <cstddef>
+#include "TerminalManager.h"
 
-#include "./Cell.h"
-#include "./TerminalManager.h"
-#include <unordered_map>
-
-// A simple struct that stores the "inversity" and the intensity
-// of a drawn Pixel.
-class Pixel {
+// Class for the input from the user.
+class UserInput {
 public:
-  bool inverse_ = false;
-  float intensity_ = 0.f;
-
-  Pixel(bool inverse, float intensity)
-      : inverse_{inverse}, intensity_{intensity} {}
-  Pixel() = default;
+  bool isKeyUp();
+  bool isKeyDown();
+  bool isKeyLeft();
+  bool isKeyRight();
+  // The code of the key pressed.
+  int keycode_;
+  // Was the event a mousecklick.
+  bool isMouseclick_;
+  // If the event was a mousecklick, then the coordinates
+  // of the mouseclick are stored here.
+  int mouseX_ = -1;
+  int mouseY_ = -1;
 };
 
-// An implementation of a terminal Manager that "draws" the pixels
-// to a 2d-Array for testing/mocking purposes
-class MockTerminalManager : public TerminalManager {
-private:
-  // This map stores the pixels which have been drawn using the drawPixel
-  // method
-  std::unordered_map<Cell, Pixel> drawnPixels_;
-  int numRows_;
-  int numCols_;
-
+// A class managing the input and output via the terminal, using ncurses.
+class MockTerminalManager: public TerminalManager{
 public:
-  // Construct with the given inumber of rows and cols.
-  MockTerminalManager(int numRows, int numCols)
-      : numRows_{numRows}, numCols_{numCols} {};
+  // Constructor: initialize the terminal for use with ncurses.
+  MockTerminalManager();
 
-  ~MockTerminalManager() = default;
+  // Destructor: Clean up the screen.
+  // ~NcursesTerminalManager();
+
+  // Get input from the user.
+  UserInput getUserInput();
 
   // Draw a "pixel" at the given position and with the given intensity between
   // The intensity has to be in [0.0, 1.0]
-  void drawPixel(int row, int col, bool inverse, float intensity) override;
+  void drawPixel(int row, int col, bool inverse, float intensity);
 
-  // Nothing to do for "refresh"
-  void refresh() override{};
+  // Draw a string at the given position and with the given intensity.
+  // The intensity has to be in [0.0, 1.0]
+  void drawString(int row, int col, const char *output, float intensity = 1.0);
+
+  // Refresh the screen.
+  void refresh();
 
   // Get the dimensions of the screen.
-  int numRows() const override { return numRows_; }
-  int numCols() const override { return numCols_; }
+  int numRows() const { return numRows_; }
+  int numCols() const { return numCols_; }
 
-  // Returns true iff there previously was a call to
-  // drawPixel(row, col).
-  bool isPixelDrawn(int row, int col) const;
+  // Get the number of colors.
+  int numColors();
 
-  // Returns the "inverse" argument of the last call to
-  // drawPixel(row, col);
-  // Throws an exception if there was no such call.
-  bool isPixelInverse(int row, int col) const;
+private:
+  // The number of "logical" rows and columns of the screen.
+  int numRows_;
+  int numCols_;
 
-  // Returns the "intensity" argument of the last call to
-  // drawPixel(row, col);
-  // Throws an exception if there was no such call.
-  float getIntensity(int row, int col) const;
+  // Convert an intensity in the range [0.0, 1.0] to the index of the
+  // corresponding color
+  size_t convertIntensityToColor(float intensity) const;
 };

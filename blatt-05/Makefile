@@ -1,27 +1,26 @@
 .SUFFIXES:
-.PHONY: all compile checkstyle test clean format
+.PHONY: all compile checkstyle clean
+.PRECIOUS: %.o
 
-CXX = clang++ -std=c++17 -Wall -Wextra -O3 -I/usr/include/freetype2
+CXX = clang++ -std=c++14 -Wall -Wextra -fsanitize=address
 BASENAME = GameOfLife
-OBJS = $(BASENAME).o TerminalManager.o
-LIBS = -lncurses 
-#OBJS = $(BASENAME).o OpenGLTerminalManager.o
-#LIBS = -lncurses -lglfw -lGL -lX11 -lrt -ldl -lfreetype
+LIBS = -lncurses
+OBJS = GameOfLife.o TerminalManager.o
 TESTLIBS = -lgtest -lgtest_main -lpthread
+SOURCES = $(wildcard *.cpp)
 
-all: compile format checkstyle test
+all: compile checkstyle run
+
+run:
+	./"GameOfLifeMain"
 
 compile: $(BASENAME)Main 
 
 checkstyle:
-	clang-format-14 --dry-run -Werror *.h *.cpp
+	clang-format --dry-run -Werror *.h *.cpp
 
-format:
-	clang-format-14 -i *.h *.cpp
-
-
-test: $(BASENAME)Test
-	./$<
+# test: $(BASENAME)Test
+# 	./$<
 
 %.o: %.cpp *.h
 	$(CXX) -c $<
@@ -29,10 +28,20 @@ test: $(BASENAME)Test
 %Main: %Main.o $(OBJS)
 	$(CXX) -o $@ $^ $(LIBS)
 
-%Test: %Test.o $(OBJS)
-	$(CXX) -o $@ $^ $(LIBS) $(TESTLIBS)
+# %Test: %Test.o $(OBJS)
+# 	$(CXX) -o $@ $^ $(LIBS) $(TESTLIBS)
 
 clean:
 	rm -f *Main
 	rm -f *Test
 	rm -f *.o
+
+clean+:
+	rm -f *Main
+	rm -f *Test
+	rm -f *.o
+	reset
+	make
+
+format:
+	clang-format -i *.cpp *.h

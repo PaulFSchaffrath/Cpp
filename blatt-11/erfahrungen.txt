@@ -1,0 +1,17 @@
+Das Projekt macht mir bisher ganz gut Spaß. (Wie man vielleicht schon an der Menge der Dateien erkennen kann.
+Ich hatte irgendwie immer so viele Einfälle gleichzeitig, dass das manchmal etwas überwältigend war. Vor allem von der Menge.
+Sodass ich mich manchmal nicht entscheiden konnte, was ich als Nächstes machen soll.
+Deswegen habe ich irgendwie versucht alles zu machen, was etwas dumm war, aber irgendwie auch Spaß gemacht hat.
+Immer wieder hier und da was einzufügen. Und ahh hier für diese Funktion brauche ich noch diese aus der und der Klasse.
+Und dann wieder hier das und das.
+Im Nachhinein hätte ich vielleicht damit angefangen, einfach mal den COde so zu schreiben im ersten Schritt, dass ich ein
+Spielfeld mit Rand habe und es erstmal schaffe, ein Tetromino zu zeichnen. (Punkt!)
+Dann im Nächsten Schritt, die moveLeft und MoveRight funktionen hinzufügen.
+Usw. Also mit wenig Anfangen und dann immer mehr implementieren.
+Na ja kann ich ja immer noch machen.
+
+Also Schach...
+Elo ist irgendwo zwischen 600 und 900, mal gewesen. Habe mal eine Zeit lang Aktiv gespielt, aktuell aber eher weniger.
+Liegt daran, dass ich aktuell nicht soviel Lust auf Spiele habe, bei denen man groß Nachdenken muss. Ganz schlimm wird es dann,
+wenn es auch noch auf Zeit geht. Da sind Schach und ich nicht die besten Freunde.
+Da ist auch mal ne Runde Tetris zwischendurch nicht schlecht.

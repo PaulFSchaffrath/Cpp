@@ -5,8 +5,11 @@
 
 #pragma once
 
-#include "./Cell.h"
-#include "./TerminalManager.h"
+#include "./NcursesTerminalManager.h"
+// Replace the previous line by the following lines to use
+// OpenGL
+// #include "OpenGL/OpenGLTerminalManager.h"
+// using NcursesTerminalManager = OpenGLTerminalManager;
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -16,6 +19,28 @@ class Point {
 public:
   float longitude_;
   float latitude_;
+};
+
+// A 2D cell with size_t coordinates.
+class Cell {
+public:
+  size_t row_;
+  size_t col_;
+  // To store the Cells in a hashMap we have
+  // to define the equality == between Cells.
+  bool operator==(const Cell &other) const {
+    return row_ == other.row_ && col_ == other.col_;
+  }
+};
+
+// We use Cell as the key type to a hash map, so we have to define
+// a hash function
+template <> struct std::hash<Cell> {
+  size_t operator()(const Cell &p) const {
+    auto hash1 = std::hash<size_t>{}(p.row_);
+    auto hash2 = std::hash<size_t>{}(p.col_);
+    return 2 * hash1 ^ hash2;
+  }
 };
 
 class HeatMap {
@@ -35,8 +60,8 @@ public:
   // columns.
   void computeHeatMap(size_t numRows, size_t numCols);
 
-  // Draw the heat map on the stream using the TerminalManager.
-  void drawHeatMap(TerminalManager *tm) const;
+  // Draw the heat map on the stream using the NcursesTerminalManager.
+  void drawHeatMap(NcursesTerminalManager *tm) const;
 
   // Const access to members for testing.
   const std::vector<Point> &points() { return points_; }

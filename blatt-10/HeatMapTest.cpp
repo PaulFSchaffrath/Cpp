@@ -5,7 +5,6 @@
 //
 
 #include "./HeatMap.h"
-#include "./MockTerminalManager.h"
 #include <gtest/gtest.h>
 
 TEST(HeatMap, ReadPointsFromFile) {
@@ -46,30 +45,4 @@ TEST(HeatMap, ComputeHeatMap) {
 
   // These tests currently don't test the scaling of the longitude, but only the
   // behavior that was expected in the exercise sheet
-}
-
-TEST(HeatMap, DrawHeatMap) {
-  HeatMap heatMap;
-  heatMap.readPointsFromFile("testPoints.tsv");
-  MockTerminalManager tm(9, 9);
-  heatMap.computeHeatMap(tm.numRows(), tm.numCols());
-  heatMap.drawHeatMap(&tm);
-
-  for (int i = 0; i < tm.numRows(); ++i) {
-    for (int j = 0; j < tm.numCols(); ++j) {
-      if (i != 4 || (j != 0 && j != 8)) {
-        ASSERT_FALSE(tm.isPixelDrawn(i, j));
-      }
-    }
-  }
-
-  int row = 4;
-  int col = 0;
-  ASSERT_TRUE(tm.isPixelDrawn(row, col));
-  ASSERT_TRUE(tm.isPixelInverse(row, col));
-  ASSERT_FLOAT_EQ(0.5, tm.getIntensity(row, col));
-  col = 8;
-  ASSERT_TRUE(tm.isPixelDrawn(row, col));
-  ASSERT_TRUE(tm.isPixelInverse(row, col));
-  ASSERT_FLOAT_EQ(1.0, tm.getIntensity(row, col));
 }

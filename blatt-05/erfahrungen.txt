@@ -1,0 +1,11 @@
+Kniffliges Arbeitsblatt durch viele kleinigkeiten auf die man achten musste,
+welche alle sehr gerne fehleranfällig sind. Leider keine Zeit (und vielleicht
+auch keine Motivation*1) noch Unittests zu schreiben bzw die Implementierung von
+FRIEND_TEST usw...
+Danke immer für das Feedback!
+
+Keine weiteren Fragen euer Ehren :)
+
+
+* Liegt wahrscheinlich an der aktuellen Generation... total unmotiviert und
+  faul.

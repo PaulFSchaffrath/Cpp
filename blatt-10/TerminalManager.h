@@ -1,24 +1,27 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Author: Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>.
+//
+// Created by Paul Schaffrath on 01.07.24.
+//
 
-#pragma once
+#ifndef BLATT_10_TERMINALMANAGER_H
+#define BLATT_10_TERMINALMANAGER_H
 
-// An abstract base class that defines an interface for drawing pixels
-// on a screen.
+#include <iostream>
+
+// Abstract class for the terminal manager
 class TerminalManager {
 public:
-  // Virtual destructor.
-  virtual ~TerminalManager() = default;
+    // Destructor
+    virtual ~TerminalManager() = default;
 
-  // Draw a "pixel" at the given position and with the given intensity between
-  // The intensity has to be in [0.0, 1.0]
-  virtual void drawPixel(int row, int col, bool inverse, float intensity) = 0;
+    // Print a pixel on terminal
+    virtual void drawPixel(int x, int y, int intensity) = 0;
 
-  // Refresh the screen.
-  virtual void refresh() = 0;
+    // Print a string to the terminal
+    virtual void print(const std::string& str) = 0;
 
-  // Get the dimensions of the screen.
-  virtual int numRows() const = 0;
-  virtual int numCols() const = 0;
+    // Read a string from the terminal
+    virtual std::string read() = 0;
+
 };
+
+#endif //BLATT_10_TERMINALMANAGER_H

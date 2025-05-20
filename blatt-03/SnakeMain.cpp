@@ -1,52 +1,57 @@
-// Copyright 2024, University of Freiburg
-// Chair of Algorithms and Data Structures
-// Author: Hannah Bast <bast@cs.uni-freiburg.de>,
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
+// Copyright 2024, Paul Schaffrath
 
 #include "./Snake.h"
 #include <ncurses.h>
 #include <unistd.h>
 
-// Speed in pixels per second.
-double speed = 1;
-// Acceleration in pixel per second squared.
-double acceleration = 1;
-
-// Main function.
 int main() {
+  // Terminal and game Initialization
   initTerminal();
   initGame();
-  drawBorder(COLOR_BLUE);
-  drawSnake(COLOR_GREEN);
-  refresh();
 
-  // The absolute distance moved since the last call to moveSnake(). If it
-  // becomes > 1 we have to move the snake by one pixel.
-  double distance = 0;
-  while (true) {
-    while (true) {
-      if (!handleKey(getch())) {
-        endwin();
-        return 0;
-      }
-      usleep(1000);
-      distance += speed / 1000;
-      speed += acceleration / 1000;
-      if (distance >= 1.0) {
-        distance -= 1.0;
-        break;
+  // Velocity and acceleration
+  int speed = 500;      // 1 / 1000 pixel per second
+  int acceleration = 3; // 1 / 1000 pixel per second squared
+
+  // Draw Borderline and starting snake
+  drawBorder(1);
+  drawSnake(2);
+
+  // Game Loop
+  for (int i = 0; i < 1000000; ++i) {
+    bool shut_down = false;
+
+    drawSnake(2);
+    int key = getch();
+    if (handleKey(key)) {
+      while (true) {
+        if (handleKey(getch())) {
+          shut_down = true;
+          break;
+        }
       }
     }
-    drawSnake(COLOR_BLACK);
-    moveSnake();
-    drawSnake(COLOR_GREEN);
-    refresh();
+    if (shut_down) {
+      break;
+    }
+    if (i % (speed) == 0) {
+      refresh();
+      drawPixel(yPos, xPos, 3);
+      moveSnake();
+      refresh();
+      if (speed - acceleration > 5) {
+        speed -= acceleration;
+      }
+    }
+
     if (collidesWithBorder()) {
-      // Game over, wait for the escape key to be pressed.
-      while (handleKey(getch())) {
-      }
-      endwin();
-      return 0;
+      break;
     }
+    usleep(1000);
   }
+
+  // Close Ncurses window
+  endNcurses();
+
+  return 0;
 }

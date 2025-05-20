@@ -23,7 +23,7 @@ TEST(String, DefaultConstructedStringIsNullTerminated) {
 TEST(String, ConstCorrectness) {
   const String s1;
   ASSERT_EQ('\0', s1.c_str()[0]);
-  ASSERT_EQ(0, s1.size());
+  ASSERT_EQ(0u, s1.size());
 }
 
 // Test the assignment operator

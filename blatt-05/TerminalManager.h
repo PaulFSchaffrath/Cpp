@@ -1,57 +1,45 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures
-// Author: Hannah Bast <bast@cs.uni-freiburg.de>
+// Copyright 2024, Paul Schaffrath
 
-#pragma once
+#include <ncurses.h>
 
-// Class to represent user input (key or mouse events).
 class UserInput {
 public:
-  // Functions that check for particular keys.
-  bool isEscape();
-  bool isKeyLeft();
-  bool isKeyRight();
-  bool isKeyUp();
-  bool isKeyDown();
-  bool isMouseclick();
-  // The code of the key that was pressed.
   int keycode_;
-  int mouseRow_ = -1;
-  int mouseCol_ = -1;
+  MEVENT event;
+  bool isKey_q();
+  bool isKey_c();
+  bool isKey_r();
+  bool isKey_s();
+  bool isKey_g();
+  bool isKey_G();
+  bool isSpace();
+  bool isMouse();
 };
 
-// A class to draw pixels on or read input from the terminal, using ncurses.
 class TerminalManager {
-public:
-  // Available colors.
-  static int White;
-  static int Red;
-  static int Green;
-
-  // Constructor: Set up the terminal for use with ncurses commands.
-  TerminalManager();
-
-  // Destructor: Clean up the terminal after use.
-  ~TerminalManager();
-
-  // Draw a pixel at the given logical position in the given color.
-  void drawPixel(int row, int col, int color);
-
-  // Draw a string at the given logical position
-  void drawString(int row, int col, const char *str);
-
-  // Show the contents of the screen.
-  void refresh();
-
-  // Return the logical dimensions of the screen.
-  int numRows() { return numRows_; }
-  int numCols() { return numCols_; }
-
-  // Get user input.
-  UserInput getUserInput();
-
 private:
-  // The logical dimensions of the screen.
-  int numRows_;
+  // the actual number of cells that are shown on screen
   int numCols_;
+  int numRows_;
+
+public:
+  static const int MAX_NUM_CELLS = 1'000'000;
+
+  int numCols();
+  int numRows();
+
+  // Setup the terminal for the use with ncurses
+  void setup();
+
+  // Cleanup when finished
+  void cleanup();
+
+  // Show cells
+  void printCell(int row, int col, bool getCurrent);
+
+  // Show information
+  void showInfo(int numSteps, int numLivingCells, bool isRunning);
+
+  // Get input from the user.
+  UserInput getUserInput();
 };

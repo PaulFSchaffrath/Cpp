@@ -4,7 +4,8 @@
 //         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
 
 #include "./HeatMap.h"
-#include "./NCursesTerminalManager.h"
+// NcursesTerminalManager is implicitly included by HeatMap.h
+// This makes replacing it by OpenGL easier.
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -17,7 +18,7 @@ int main(int argc, char **argv) {
     std::exit(1);
   }
 
-  NCursesTerminalManager tm;
+  NcursesTerminalManager tm;
   HeatMap heatMap;
   const size_t numRows = tm.numRows();
   const size_t numCols = tm.numCols();

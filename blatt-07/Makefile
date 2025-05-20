@@ -1,25 +1,30 @@
 .SUFFIXES:
 .PRECIOUS: %.o
 .PHONY: all compile checkstyle test clean
-CXX = clang++-14 -Wall -Wextra -Wdeprecated -O3
+
+CXX = clang++ -std=c++20 -Wall -Wextra -Wdeprecated -fsanitize=address
 MAIN_BINARY = $(basename $(wildcard *Main.cpp))
 TEST_BINARY = $(basename $(wildcard *Test.cpp))
 LIBS = -lncurses
 TESTLIBS = -lgtest -lgtest_main -lpthread
 OBJECTS = $(addsuffix .o, $(basename $(filter-out %Main.cpp %Test.cpp, $(wildcard *.cpp))))
 
-all: compile checkstyle test
+all: compile checkstyle test # run
 
 compile: $(MAIN_BINARY) $(TEST_BINARY)
 
 checkstyle:
-	clang-format-14 --dry-run -Werror *.h *.cpp
+	clang-format --dry-run -Werror *.h *.cpp
 
 test: $(TEST_BINARY)
 	./$<
 
+run: $(MAIN_BINARY)
+	reset
+	./$< 4500
+
 %.o: %.cpp *.h
-	$(CXX) -c $<
+	$(CXX) -c -g $<
 
 %Main: %Main.o $(OBJECTS)
 	$(CXX) -o $@ $^ $(LIBS)
@@ -33,4 +38,4 @@ clean:
 	rm -f *.o
 
 format:
-	clang-format-14 -i *.cpp *.h
+	clang-format -i *.cpp *.h

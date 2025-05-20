@@ -1,15 +1,21 @@
+all: checkstyle compile test clean
+
+
 compile:
-	clang++ -o GcdMain GcdMain.cpp 
-	clang++ -o GcdTest GcdTest.cpp -lgtest
+	clang++ -o GcdMain GcdMain.cpp
+	clang++ -std=c++14 -o GcdTest GcdTest.cpp -lgtest
+
+format:
+	clang-format -i Gcd.cpp
+	clang-format -i GcdMain.cpp
+	clang-format -i GcdTest.cpp
+
+checkstyle:
+	clang-format --dry-run -Werror *.cpp
 
 test:
 	./GcdTest
 
-checkstyle:
-	clang-format-14 *.cpp --dry-run -Werror
-
 clean:
-	rm -f ./GcdMain ./GcdTest
-
-format:
-	clang-format-14 -i *.cpp
+	rm -f GcdMain
+	rm -f GcdTest

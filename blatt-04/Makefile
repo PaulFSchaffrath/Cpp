@@ -1,35 +1,42 @@
 .SUFFIXES:
-.PHONY: all compile checkstyle test clean
+.PHONY: clean format checkstyle compile run  # test
+.PRECIOUS: %.o
 
-CXX = clang++-14 -Wall -Wextra -fsanitize=address
-BASENAME = GameOfLife
-LIBS = -lncurses
-TESTLIBS = -lgtest -lgtest_main -lpthread
+CXX = clang++ -std=c++14
+HEADERS = $(wildcard *.h)
+SOURCES = $(wildcard *.cpp)
+OBJECT = GameOfLife.o
+MAIN = GameOfLifeMain
+TEST = GameOfLifeTest
 
-all: compile checkstyle test
+all: clean format checkstyle compile run  # test
 
-compile: $(BASENAME)Main 
+compile: $(MAIN)  # $(TEST)
 
-checkstyle:
-	clang-format-14 --dry-run -Werror *.h *.cpp
-
-test: $(BASENAME)Test
-	./$<
-
-%.o: %.cpp *.h
-	$(CXX) -c $<
-
-%Main: %Main.o %.o
-	$(CXX) -o $@ $^ $(LIBS)
-
-%Test: %Test.o %.o
-	$(CXX) -o $@ $^ $(LIBS) $(TESTLIBS)
-
-
-clean:
-	rm -f *Main
-	rm -f *Test
-	rm -f *.o
+run:
+	./$(MAIN)
 
 format:
-	clang-format-14 -i *.cpp *.h
+	clang-format -i $(SOURCES)
+
+checkstyle:
+	clang-format --dry-run -Werror $(SOURCES)
+
+test:
+	./$(TEST)
+
+clean:
+	rm -f $(MAIN)
+	rm -f $(TEST)
+	rm -f *.o
+	rm -f a.out
+
+%.o: %.cpp $(HEADER)
+	$(CXX) -c $<
+
+$(MAIN): GameOfLifeMain.o $(OBJECT)
+	$(CXX) -o $@ $^ -lncurses
+
+# $(TEST): GameOfLifeTest.o $(OBJECT)
+#	$(CXX) -o $@ $^ -lncurses -lgtest -lgtest_main
+

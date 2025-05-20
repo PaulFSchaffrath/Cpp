@@ -1,117 +1,209 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Author: Hannah Bast <bast@cs.uni-freiburg.de>
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
-//
-//
+// Copyright 2024, Paul Schaffrath,
+// <ps609@students.uni-freiburg.de>.
 
-#include "RingBuffer.h"
-#include <cstdlib>
+#include "./RingBuffer.h"
 #include <gtest/gtest.h>
 
-// ________________________________
-TEST(RingBuffer, CapacityZero) {
+// Test the standard values of the RingBuffer for different types
+TEST(RingBufferTest, StandardValues) {
   {
-    RingBuffer<int> r{0};
-    ASSERT_TRUE(r.isFull());
-    ASSERT_TRUE(r.isEmpty());
+    RingBuffer<float> rb_f(13);
+    ASSERT_EQ(13u, rb_f.capacity());
+    ASSERT_EQ(0u, rb_f.size());
+    ASSERT_EQ(0u, rb_f.head());
+    ASSERT_EQ(0u, rb_f.tail());
   }
   {
-    RingBuffer<bool> r{0};
-    ASSERT_TRUE(r.isFull());
-    ASSERT_TRUE(r.isEmpty());
+    RingBuffer<int> rb_i(17);
+    ASSERT_EQ(17u, rb_i.capacity());
+    ASSERT_EQ(0u, rb_i.size());
+    ASSERT_EQ(0u, rb_i.head());
+    ASSERT_EQ(0u, rb_i.tail());
   }
 }
 
-// ________________________________
-TEST(RingBuffer, CapacityOne) {
+// Test the push functions
+TEST(RingBufferTest, TestPush) {
+  // Test for <int>
   {
-    RingBuffer<int> r{1};
-    ASSERT_FALSE(r.isFull());
-    ASSERT_TRUE(r.isEmpty());
-    // Repeated cycles of inserts and deletes
-    for (size_t i = 0; i < 20; ++i) {
-      r.push(i);
-      ASSERT_TRUE(r.isFull());
-      ASSERT_FALSE(r.isEmpty());
-      ASSERT_EQ(i, r.pop());
-      ASSERT_FALSE(r.isFull());
-      ASSERT_TRUE(r.isEmpty());
-    }
+    RingBuffer<int> rb_i1(5);
+    rb_i1.push(1);
+    rb_i1.push(24);
+    rb_i1.push(13);
+    ASSERT_EQ(3u, rb_i1.size());
+    ASSERT_EQ(0u, rb_i1.head());
+    ASSERT_EQ(3u, rb_i1.tail());
+    ASSERT_EQ(1, rb_i1.elements()[0]);
+    ASSERT_EQ(24, rb_i1.elements()[1]);
+    ASSERT_EQ(13, rb_i1.elements()[2]);
   }
-
   {
-    RingBuffer<bool> r{1};
-    ASSERT_FALSE(r.isFull());
-    ASSERT_TRUE(r.isEmpty());
-    // Repeated cycles of inserts and deletes
-    for (size_t i = 0; i < 20; ++i) {
-      bool value = i % 2 == 0;
-      r.push(value);
-      ASSERT_TRUE(r.isFull());
-      ASSERT_FALSE(r.isEmpty());
-      ASSERT_EQ(value, r.pop());
-      ASSERT_FALSE(r.isFull());
-      ASSERT_TRUE(r.isEmpty());
-    }
+    RingBuffer<int> rb_i2(3);
+    rb_i2.push(222);
+    rb_i2.push(333);
+    rb_i2.push(111);
+    ASSERT_EQ(3u, rb_i2.size());
+    ASSERT_EQ(0u, rb_i2.head());
+    ASSERT_EQ(0u, rb_i2.tail());
+    ASSERT_EQ(222, rb_i2.elements()[0]);
+    ASSERT_EQ(333, rb_i2.elements()[1]);
+    ASSERT_EQ(111, rb_i2.elements()[2]);
+  }
+  // Test for <float>
+  {
+    RingBuffer<float> rb_f1(5);
+    rb_f1.push(1.1);
+    rb_f1.push(24.2);
+    rb_f1.push(13.3);
+    ASSERT_EQ(3u, rb_f1.size());
+    ASSERT_EQ(0u, rb_f1.head());
+    ASSERT_EQ(3u, rb_f1.tail());
+    ASSERT_FLOAT_EQ(1.1, rb_f1.elements()[0]);
+    ASSERT_FLOAT_EQ(24.2, rb_f1.elements()[1]);
+    ASSERT_FLOAT_EQ(13.3, rb_f1.elements()[2]);
+  }
+  {
+    RingBuffer<float> rb_f2(4);
+    rb_f2.push(222.2);
+    rb_f2.push(333.3);
+    rb_f2.push(111.1);
+    ASSERT_EQ(3u, rb_f2.size());
+    ASSERT_EQ(0u, rb_f2.head());
+    ASSERT_EQ(3u, rb_f2.tail());
+    ASSERT_FLOAT_EQ(222.2, rb_f2.elements()[0]);
+    ASSERT_FLOAT_EQ(333.3, rb_f2.elements()[1]);
+    ASSERT_FLOAT_EQ(111.1, rb_f2.elements()[2]);
   }
 }
 
-// _______________________________
-TEST(RingBufferInt, CapacityTwo) {
-  RingBuffer<int> r{2};
-  ASSERT_FALSE(r.isFull());
-  ASSERT_TRUE(r.isEmpty());
-  // Repeated cycles of inserts and deletes
-  for (size_t i = 0; i < 20; ++i) {
-    r.push(i + 42);
-    // Only one element pushed
-    ASSERT_FALSE(r.isFull());
-    ASSERT_FALSE(r.isEmpty());
-    r.push(i + 43);
-    ASSERT_TRUE(r.isFull());
-    ASSERT_FALSE(r.isEmpty());
-    // Both spots are filled.
-    ASSERT_EQ(r.pop(), i + 42);
-    ASSERT_FALSE(r.isFull());
-    ASSERT_FALSE(r.isEmpty());
-    // Only the second spot is filled.
-    r.push(i + 44);
-    ASSERT_TRUE(r.isFull());
-    ASSERT_FALSE(r.isEmpty());
-    // Both spots are filled, but the first element is in the second spot
-    ASSERT_EQ(r.pop(), i + 43);
-    ASSERT_FALSE(r.isFull());
-    ASSERT_FALSE(r.isEmpty());
-    ASSERT_EQ(r.pop(), i + 44);
-    ASSERT_FALSE(r.isFull());
-    ASSERT_TRUE(r.isEmpty());
+// Test the pop functions
+TEST(RingBufferTest, TestPop) {
+  // Test for <int>
+  {
+    RingBuffer<int> rb_i1(5);
+    rb_i1.push(1);
+    rb_i1.push(24);
+    rb_i1.push(13);
+    ASSERT_EQ(1, rb_i1.pop());
+    ASSERT_EQ(2u, rb_i1.size());
+    ASSERT_EQ(24, rb_i1.pop());
+    ASSERT_EQ(1u, rb_i1.size());
+    ASSERT_EQ(13, rb_i1.pop());
+    ASSERT_EQ(0u, rb_i1.size());
+  }
+  {
+    RingBuffer<int> rb_i2(3);
+    rb_i2.push(222);
+    rb_i2.push(333);
+    rb_i2.push(111);
+    ASSERT_EQ(222, rb_i2.pop());
+    ASSERT_EQ(2u, rb_i2.size());
+    ASSERT_EQ(333, rb_i2.pop());
+    ASSERT_EQ(1u, rb_i2.size());
+    ASSERT_EQ(111, rb_i2.pop());
+    ASSERT_EQ(0u, rb_i2.size());
+  }
+  // Test for <float>
+  {
+    RingBuffer<float> rb_f1(5);
+    rb_f1.push(1.1);
+    rb_f1.push(24.2);
+    rb_f1.push(13.3);
+    ASSERT_FLOAT_EQ(1.1, rb_f1.pop());
+    ASSERT_EQ(2u, rb_f1.size());
+    ASSERT_FLOAT_EQ(24.2, rb_f1.pop());
+    ASSERT_EQ(1u, rb_f1.size());
+    ASSERT_FLOAT_EQ(13.3, rb_f1.pop());
+    ASSERT_EQ(0u, rb_f1.size());
+  }
+  {
+    RingBuffer<float> rb_f2(4);
+    rb_f2.push(222.2);
+    rb_f2.push(333.3);
+    rb_f2.push(111.1);
+    ASSERT_FLOAT_EQ(222.2, rb_f2.pop());
+    ASSERT_EQ(2u, rb_f2.size());
+    ASSERT_FLOAT_EQ(333.3, rb_f2.pop());
+    ASSERT_EQ(1u, rb_f2.size());
+    ASSERT_FLOAT_EQ(111.1, rb_f2.pop());
+    ASSERT_EQ(0u, rb_f2.size());
   }
 }
 
-// Test for different capacities that the RingBuffer<int> and the
-// RingBuffer<bool> behave in exactly the same way.
-TEST(RingBuffer, RandomTestConsistency) {
+// Test the isFull function
+TEST(RingBufferTest, TestIsFull) {
+  // Test for <int>
+  {
+    RingBuffer<int> rb_i1(3);
+    rb_i1.push(1);
+    rb_i1.push(24);
+    rb_i1.push(13);
+    ASSERT_TRUE(rb_i1.isFull());
+    rb_i1.pop();
+    ASSERT_FALSE(rb_i1.isFull());
+  }
+  {
+    RingBuffer<int> rb_i2(2);
+    rb_i2.push(222);
+    rb_i2.push(333);
+    ASSERT_TRUE(rb_i2.isFull());
+    rb_i2.pop();
+    ASSERT_FALSE(rb_i2.isFull());
+  }
+  // Test for <float>
+  {
+    RingBuffer<float> rb_f1(3);
+    rb_f1.push(1.1);
+    rb_f1.push(24.2);
+    rb_f1.push(13.3);
+    ASSERT_TRUE(rb_f1.isFull());
+    rb_f1.pop();
+    ASSERT_FALSE(rb_f1.isFull());
+  }
+  {
+    RingBuffer<float> rb_f2(2);
+    rb_f2.push(222.2);
+    rb_f2.push(333.3);
+    ASSERT_TRUE(rb_f2.isFull());
+    rb_f2.pop();
+    ASSERT_FALSE(rb_f2.isFull());
+  }
+}
 
-  size_t capacities[5] = {0, 1, 15, 100, 256};
-  for (size_t i = 0; i < 5; ++i) {
-    size_t capacity = capacities[i];
-    RingBuffer<int> ints(capacity);
-    RingBuffer<bool> bools(capacity);
-
-    // 100'000 random operations
-    for (size_t k = 0; k < 100'000; ++k) {
-      ASSERT_EQ(ints.isFull(), bools.isFull());
-      ASSERT_EQ(ints.isEmpty(), bools.isEmpty());
-      bool doPush = (!ints.isFull()) && (ints.isEmpty() || drand48() > 0.5);
-      bool doPop = !doPush && !ints.isEmpty();
-      if (doPush) {
-        bool value = drand48() > 0.5;
-        ints.push(value);
-        bools.push(value);
-      } else if (doPop) {
-        ASSERT_EQ(bools.pop(), bool(ints.pop()));
-      }
-    }
+// Test the isEmpty function
+TEST(RingBufferTest, TestIsEmpty) {
+  // Test for <int>
+  {
+    RingBuffer<int> rb_i1(3);
+    ASSERT_TRUE(rb_i1.isEmpty());
+    rb_i1.push(1);
+    ASSERT_FALSE(rb_i1.isEmpty());
+    rb_i1.pop();
+    ASSERT_TRUE(rb_i1.isEmpty());
+  }
+  {
+    RingBuffer<int> rb_i2(2);
+    ASSERT_TRUE(rb_i2.isEmpty());
+    rb_i2.push(222);
+    ASSERT_FALSE(rb_i2.isEmpty());
+    rb_i2.pop();
+    ASSERT_TRUE(rb_i2.isEmpty());
+  }
+  // Test for <float>
+  {
+    RingBuffer<float> rb_f1(3);
+    ASSERT_TRUE(rb_f1.isEmpty());
+    rb_f1.push(1.1);
+    ASSERT_FALSE(rb_f1.isEmpty());
+    rb_f1.pop();
+    ASSERT_TRUE(rb_f1.isEmpty());
+  }
+  {
+    RingBuffer<float> rb_f2(2);
+    ASSERT_TRUE(rb_f2.isEmpty());
+    rb_f2.push(222.2);
+    ASSERT_FALSE(rb_f2.isEmpty());
+    rb_f2.pop();
+    ASSERT_TRUE(rb_f2.isEmpty());
   }
 }

@@ -2,7 +2,7 @@
 .PRECIOUS: %.o
 .PHONY: all compile checkstyle test clean
 
-CXX = clang++-14 -Wall -Wextra -Wdeprecated -fsanitize=address
+CXX = clang++ -std=c++20 -Wall -Wextra -Wdeprecated -fsanitize=address
 MAIN_BINARY = $(basename $(wildcard *Main.cpp))
 TEST_BINARY = $(basename $(wildcard *Test.cpp))
 LIBS = -lncurses
@@ -14,13 +14,13 @@ all: compile checkstyle test
 compile: $(MAIN_BINARY) $(TEST_BINARY)
 
 checkstyle:
-	clang-format-14 --dry-run -Werror *.h *.cpp
+	clang-format --dry-run -Werror *.h *.cpp
 
 test: $(TEST_BINARY)
 	./$<
 
 %.o: %.cpp *.h
-	$(CXX) -c $<
+	$(CXX) -c -g $<
 
 %Main: %Main.o $(OBJECTS)
 	$(CXX) -o $@ $^ $(LIBS)
@@ -34,4 +34,4 @@ clean:
 	rm -f *.o
 
 format:
-	clang-format-14 -i *.cpp *.h
+	clang-format -i *.cpp *.h

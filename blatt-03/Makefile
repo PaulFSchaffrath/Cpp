@@ -1,37 +1,42 @@
 .SUFFIXES:
-.PHONY: all compile checkstyle test clean format
+.PHONY: clean format checkstyle compile run test
 .PRECIOUS: %.o
 
-CXX = clang++-14
-BASENAME = Snake
-LIBS = -lncurses
-TESTLIBS = -lgtest -lgtest_main -lpthread
+CXX = clang++ -std=c++14
+HEADERS = $(wildcard *.h)
+SOURCES = $(wildcard *.cpp)
+OBJECT = Snake.o
+MAIN = SnakeMain
+TEST = SnakeTest
 
-all: compile format checkstyle test
+all: clean format checkstyle compile run test
 
-compile: $(BASENAME)Main 
+compile: $(MAIN) $(TEST)
 
-checkstyle:
-	clang-format-14 --dry-run -Werror *.h *.cpp
+run:
+	./$(MAIN)
 
 format:
-	clang-format-14 -i *.h *.cpp
+	clang-format -i $(SOURCES)
 
+checkstyle:
+	clang-format --dry-run -Werror $(SOURCES)
 
-test: $(BASENAME)Test
-	./$<
-
-%.o: %.cpp *.h
-	$(CXX) -c $<
-
-%Main: %Main.o %.o
-	$(CXX) -o $@ $^ $(LIBS)
-
-%Test: %Test.o %.o
-	$(CXX) -o $@ $^ $(LIBS) $(TESTLIBS)
-
+test:
+	./$(TEST)
 
 clean:
-	rm -f *Main
-	rm -f *Test
+	rm -f $(MAIN)
+	rm -f $(TEST)
 	rm -f *.o
+	rm -f a.out
+
+%.o: %.cpp $(HEADER)
+	$(CXX) -c $<
+
+$(MAIN): SnakeMain.o $(OBJECT)
+	$(CXX) -o $@ $^ -lncurses
+
+$(TEST): SnakeTest.o $(OBJECT)
+	$(CXX) -o $@ $^ -lncurses -lgtest -lgtest_main
+

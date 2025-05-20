@@ -1,3 +1,0 @@
-POINT(0.0, 2.5) "SomeLabel"
-POINT(5.0, 2.5) "SomeOtherLabel"
-POINT(5.0, 2.5) "DuplicatePoints"

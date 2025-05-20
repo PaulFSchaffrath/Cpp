@@ -1,59 +1,57 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Author: Axel Lehmann <lehmann@cs.uni-freiburg.de>,
-//         Claudius Korzen <korzen@cs.uni-freiburg.de>.
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>.
+// Copyright 2024, Paul Schaffrath
 
 #pragma once
-// The maximal number of cells, and the actual number of cells that is used by
-// the game.
-const int MAX_NUM_CELLS = 1'000'000;
-extern int numCols;
+
+#include <ncurses.h>
+
+const int MAX_NUM_CELLS = 1000;  // Maximale Anzahl an Zellen.
+
+extern bool current_state[MAX_NUM_CELLS];
+extern bool next_state[MAX_NUM_CELLS];
+extern bool* current_state_ptr;
+extern bool* next_state_ptr;
+extern int last_clicked_cell_x;
+extern int last_clicked_cell_y;
+extern int num_steps;
+extern int num_alive_cells;
+extern bool is_game_running;
+
 extern int numRows;
+extern int numCols;
 
-// The two pointers to the current and previous grid, they are switched after
-// each iteration.
-extern bool *previousGrid;
-extern bool *currentGrid;
 
-// Last coordinate clicked inside grid.
-extern int lastClickedCol;
-extern int lastClickedRow;
+// The state of all pixels on the screen + the dimensions of the screen.
+const int MAX_NUM_PIXELS = 10'000;
 
-// Additional global state
-extern bool isRunning;
-extern int numSteps;
-extern int numLivingCells;
+extern bool pixels[MAX_NUM_PIXELS];
 
-// Functions that get or set the previous or current grid value at a given
-// position.
-void setPrevious(int row, int col, bool value);
-void setCurrent(int row, int col, bool value);
-bool getCurrent(int row, int col);
-bool getPrevious(int row, int col);
-
-// The implementation of the four functions above.
-void set(int row, int col, bool value, bool usePrevious);
-bool get(int row, int col, bool usePrevious);
-
-// Initialize the terminal
+// Initialize Ncurses.
 void initTerminal();
 
-// Initialize the game
+// Initialize the Game (set default values).
 void initGame();
 
-// Handle key and mouse presses. Change the new grid.
-bool processUserInput(int keycode);
+// Clean up Ncurses.
+void endNcurses();
 
-// Calculate the next state and write it into new grid.
-void updateState();
+// Set pixel at given logical position.
+void setPixel(int row, int col, bool value);
 
-// Count the number of alive cells around given coordinates in the old grid.
-int numAliveNeighbours(int row, int col);
+// Get the value of the pixel at the given logical position.
+bool getPixel(int row, int col);
 
-// Draw the new grid using ncurses.
+// Draw glider at given logical position.
+void drawGlider(int row, int col);
+
+// Draw all pixels.
 void showState();
 
-// Additional helper functions not explicitly mentioned in the sheet.
-// Returns true if the coordinates (x, y) are inside the grid
-bool isLegalPosition(int row, int col);
+// Set all pixels to random values.
+void setPixelsToRandomValues();
+
+int numAliveNeighbors(int row, int col);
+
+void updateState();
+
+// Process mouse click. Return true if there was a mouse click.
+bool processUserInput(int keycode);

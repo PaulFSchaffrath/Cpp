@@ -1,0 +1,40 @@
+Juhuu, diese Woche gibts mal wieder auch ein Erfahrung File.
+Sorry dafür für letztes Mal, und danke für das Feedback.
+
+-------------------------------------------------------
+Aufgabe 3)
+FÜr n = 4500, benötigt sortWithCopy 0.633184 Sekunden und sortWithMove 18.651899 Sekunden.
+Also gut das 30-fache an Zeit.
+
+Die Laufzeitmessungen waren ganz interessant, weil die Laufzeit von sortWithMove
+um einiges schnell (kürzer) war als die von sortWithCopy. Das liegt daran, dass bei
+sortWithMove die Move-Semantik verwendet wird, um Speicher zu sparen und unnötige Kopien
+zu vermeiden. Bei sortWithCopy werden alle Strings kopiert, was mehr Zeit und Speicher
+benötigt. Die Ergebnisse zeigen, dass die Move-Semantik besonders bei großen Datenmengen
+von Vorteil ist. Bei kleinen Datenmengen ist der Unterschied nicht so groß, aber trotzdem
+vorhanden. Die Laufzeitmessung zeigt, dass die Move Methode sehr effizient ist, und viel
+Speicher und Zeit spart.
+
+Wichtige Frage:
+Ich habe verucht, das wie gewollt mit -O3 zu kompilieren, jedoch hat das nicht funktioniert.
+Dann kamen, unendlich viele Fehlermeldungen von gtest. Wenn ich das normal über das Makefile kompiliert habe,
+ging das aber ohne probleme
+-------------------------------------------------------
+
+Und ich habe mal eine Frage:
+Immer ich den Code kompliliere, also das Makefile sozusagen ausführe, kompiliert er alles ohne Problem, jedoch kommt
+immer eine Warnung, die ich nicht verstehe.
+
+StringTest(60182,0x7ff85139f7c0) malloc: nano zone abandoned due to inability to reserve vm space.
+
+Hier das ganze:
+
+paulschaffrath@MBP-von-Paul blatt-07 % make
+clang-format --dry-run -Werror *.h *.cpp
+./StringTest
+StringTest(60182,0x7ff85139f7c0) malloc: nano zone abandoned due to inability to reserve vm space.
+Running main() from /Users/paulschaffrath/GTEST/googletest/googletest/src/gtest_main.cc
+[==========] Running 17 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 10 tests from String
+

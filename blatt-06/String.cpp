@@ -1,118 +1,78 @@
-// Copyright 2024, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Author: Hannah Bast <bast@cs.uni-freiburg.de>
-//         Johannes Kalmbach <kalmbach@cs.uni-freiburg.de>
-//
-#include "./String.h"
 
-// ___________________________________________________________________________
-String::String(const String &s) {
-  size_ = s.size_;
-  // Optimization for empty other string (not needed for Ü6)
-  if (size_ == 0) {
-    data_ = nullptr;
-    return;
-  }
-  data_ = new char[s.size() + 1];
-  for (size_t i = 0; i <= s.size(); ++i) {
-    data_[i] = s.data_[i];
-  }
-}
+#include "String.h"
 
-// ___________________________________________________________________________
-String &String::operator=(const String &s) {
-  if (this == &s) {
-    return *this;
-  }
-  delete[] data_;
-  size_ = s.size_;
-  // Optimization for empty other string (not needed for Ü6)
-  if (size_ == 0) {
-    data_ = nullptr;
-    return *this;
-  }
-  data_ = new char[s.size() + 1];
-  for (size_t i = 0; i <= s.size(); ++i) {
-    data_[i] = s.data_[i];
-  }
-  return *this;
-}
-
-// ___________________________________________________________________________
-String &String::operator=(const char *s) {
-  if (s == data_) {
-    return *this;
-  }
-  delete[] data_;
-  // Compute the size (without the trailing 0);
+String::String() {
   size_ = 0;
-  while (s[size_] != '\0') {
-    ++size_;
-  }
-  // Optimization for empty other string (not needed for Ü6)
-  if (size_ == 0) {
-    data_ = nullptr;
-    return *this;
-  }
-  data_ = new char[size_ + 1];
-  for (size_t i = 0; i <= size_; ++i) {
-    data_[i] = s[i];
-  }
-  return *this;
+  c_str_ = new char[size_];
+  c_str_[0] = '\0';
 }
 
-// ___________________________________________________________________________
-const char *String::c_str() const {
-  // If size() == 0, data_ is still nullptr, which is not a valid
-  // null-terminated string.
-  return size() != 0 ? data_ : "";
-}
-
-// ___________________________________________________________________________
-StringSorter::StringSorter(const StringSorter &other) {
+String::String(const String &other) {
+  c_str_ = new char[other.size_];
+  for (size_t i = 0; i < other.size_; i++) {
+    c_str_[i] = other.c_str_[i];
+  }
   size_ = other.size_;
-  if (size_ == 0) {
-    strings_ = nullptr;
-    return;
-  }
-  strings_ = new String[size_];
-  for (size_t i = 0; i < size_; ++i) {
-    strings_[i] = other.strings_[i];
-  }
 }
 
-// ___________________________________________________________________________
-StringSorter &StringSorter::operator=(const StringSorter &other) {
-  if (this == &other) {
-    return *this;
+String::~String() { delete[] c_str_; }
+
+char &String::operator[](int index) { return c_str_[index]; }
+
+void String::operator=(const String &other) {
+  delete[] c_str_;
+  c_str_ = new char[other.size_];
+  for (size_t i = 0; i < other.size_; i++) {
+    c_str_[i] = other.c_str_[i];
   }
-  delete[] strings_;
   size_ = other.size_;
-  if (size_ == 0) {
-    strings_ = nullptr;
-    return *this;
-  }
-  strings_ = new String[size_];
-  for (size_t i = 0; i < size_; ++i) {
-    strings_[i] = other.strings_[i];
-  }
-  return *this;
 }
 
-// ___________________________________________________________________________
-void StringSorter::sort() {
-  for (size_t i = 0; i < size_; ++i) {
-    for (size_t j = 0; j + i + 1 < size_; ++j) {
-      if (strcmp(strings_[j].c_str(), strings_[j + 1].c_str()) > 0) {
+void String::operator=(const char *other) {
+  delete[] c_str_;
+  size_ = 0;
+  for (size_t i = 0; other[i] != '\0'; i++) {
+    size_++;
+  }
+  c_str_ = new char[size_];
+  for (size_t i = 0; i < size_; i++) {
+    c_str_[i] = other[i];
+  }
+  c_str_[size_] = '\0';
+}
+
+size_t String::size() const { return size_; }
+
+char *String::c_str() const {
+  if ((c_str_ == nullptr) || (size_ == 0)) {
+    return nullptr;
+  }
+  return c_str_;
+}
+
+StringSorter::StringSorter(size_t size) {
+  size_ = size;
+  strings_ = new String[size];
+}
+
+size_t StringSorter::size() const { return size_; }
+
+void StringSorter::swap(size_t a, size_t b) const {
+  String temp = strings_[a];
+  strings_[a] = strings_[b];
+  strings_[b] = temp;
+}
+
+// Implement Bubblesort algorithm to sort the strings in the array for length
+// with use of string_.swap
+void StringSorter::sort() const {
+  for (size_t i = 0; i < size_; i++) {
+    for (size_t j = 0; j < size_ - i - 1; j++) {
+      if (strings_[j].size() > strings_[j + 1].size()) {
         swap(j, j + 1);
       }
     }
   }
 }
 
-// ___________________________________________________________________________
-void StringSorter::swap(size_t i, size_t j) {
-  String tmp = strings_[i];
-  strings_[i] = strings_[j];
-  strings_[j] = tmp;
-}
+String &StringSorter::operator[](size_t index) const { return strings_[index]; }
